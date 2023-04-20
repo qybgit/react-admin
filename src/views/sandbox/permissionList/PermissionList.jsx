@@ -38,16 +38,18 @@ export default function PermissionList() {
       dataIndex: 'permission',
       key: 'permission',
 
-      render: () => (
-        <>
-          <div>sss</div>
-        </>
-      ),
+      render: (permission) => {
+        return (
+          <>
+            <Tag>{permission}</Tag>
+          </>
+        )
+      },
     },
     {
       title: 'Action',
       key: 'action',
-      render: (_, record) => (
+      render: () => (
         <Space size="middle">
           <Button
             type="primary"
