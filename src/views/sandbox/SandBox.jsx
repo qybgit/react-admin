@@ -8,6 +8,7 @@ import SystemManage from './system-manage/SystemManage'
 import { Layout, Menu, theme } from 'antd'
 import styled from 'styled-components'
 import PermissionList from './permissionList/PermissionList'
+import RoleList from './roleList/RoleList'
 const { Header, Sider, Content } = Layout
 
 export default function SandBox() {
@@ -30,6 +31,7 @@ export default function SandBox() {
                 <Route path="/home" element={<Home />} />
                 <Route path="/system" element={<SystemManage />} />
                 <Route path="/admin/permission" element={<PermissionList />} />
+                <Route path="/admin/roles" element={<RoleList />} />
                 <Route path="/" element={<Home></Home>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
