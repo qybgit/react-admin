@@ -8,6 +8,7 @@ import {
   Input,
   Form,
   Tree,
+  message,
 } from 'antd'
 import React, { useState, useEffect, useRef } from 'react'
 import { http } from '../../../utils/request'
@@ -16,6 +17,7 @@ import {
   EditOutlined,
   ExclamationCircleFilled,
   CheckOutlined,
+  PlusOutlined,
   CloseOutlined,
 } from '@ant-design/icons'
 import styled from 'styled-components'
@@ -26,26 +28,37 @@ export default function RoleList() {
   const [roleMenuList, setRoleMenuList] = useState([])
   const [currentMenuList, setCurrentMenuList] = useState([])
   const [checkedKeys, setCheckedKeys] = useState([])
+  const [addRolecheckedKeys, setAddRolecheckedKeys] = useState([])
   const [roleId, setRoleId] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isAddRole, setIsAddRole] = useState(false)
   const formRef = useRef(null)
+  const addformRef = useRef(null)
   const [roleParam, setRoleParam] = useState({
     id: null,
     roleName: '',
     role_key: '',
     menusId: [],
   })
+  const [addRoleParam, setAddRoleParam] = useState({
+    role: {
+      name: null,
+      role_key: null,
+    },
+    menusId: [],
+  })
   useEffect(() => {
+    //获取角色列表设置roleList
     async function findRoleList() {
       const res = await http.get('/system/allRole')
       setRoleList(res.data.data)
       console.log('shuax')
     }
+    //获取Tree中展示的所有权限
     async function findMenuList() {
-      const res = await http.get('/admin/getMenus')
+      const res = await http.get('/admin/getRouters')
       setMenuList(res.data.data)
     }
-
     findMenuList()
     findRoleList()
     return () => {
@@ -53,22 +66,19 @@ export default function RoleList() {
       setMenuList([])
     }
   }, [])
+  //通过roleId获取角色所对应的信息包括所具有的权限
   useEffect(() => {
     if (roleId) {
       http.post(`/system/role/${roleId}`).then((res) => {
         setRoleMenuList(res.data.data)
       })
-      //设置checked默认选中框
-      // console.log(
-      //   roleList.map((item) => {
-      //     if ((item.id = roleId)) {
-      //       console.log(roleId)
-      //     }
-      //     return item.id
-      //   })
-      // )
-      const list = []
 
+      //白忙活一场
+      // const list = roleList.filter((item) => item.id == roleId)[0].menuList
+      // console.log(list.map((item) => item.id))
+      // list.filter((item) => item.grade == 2).map((item) => item.id)
+
+      //设置checked默认选中框
       setCheckedKeys(currentMenuList.map((item) => item.id))
     }
     return () => {
@@ -76,14 +86,19 @@ export default function RoleList() {
       setCheckedKeys([])
     }
   }, [roleId, currentMenuList])
+  //修改角色信息
   useEffect(() => {
     if (roleParam.id) {
       http.post(`/system/editRole`, roleParam).then((res) => {
-        console.log(res)
+        if (res.data.code == 200) {
+          message.success(res.data.msg)
+        } else {
+          message.error(res.data.msg)
+        }
       })
     }
   }, [roleParam])
-
+  //配置表格数据源
   const getChildren = (item) => {
     if (item && item.length > 0) {
       const menuC = item.map((item) => {
@@ -100,7 +115,6 @@ export default function RoleList() {
       return menuC
     }
   }
-
   const dataTree = menuList.map((item) => {
     const menuItem = {
       key: item.id,
@@ -206,9 +220,7 @@ export default function RoleList() {
       role_key: e.role_key,
       menusId: e.menuList,
     }
-    console.log(role)
     setRoleParam(role)
-    console.log(roleId)
   }
   //chenked框变化值
   const onCheck = (e) => {
@@ -217,9 +229,109 @@ export default function RoleList() {
       menuList: e,
     })
   }
+  const onaddRoleCheck = (e) => {
+    setAddRolecheckedKeys(e)
+    addformRef.current.setFieldsValue({
+      menuList: e,
+    })
+  }
+  const onAddRoleFinish = (e) => {
+    const newRole = {
+      role: {
+        name: e.roleName,
+        role_key: e.role_key,
+      },
+      menusId: e.menuList,
+    }
+    console.log(newRole)
+  }
+  const handleAddOk = () => {
+    addformRef.current.submit()
+  }
+  const handleAddCancel = () => {
+    setIsAddRole(false)
+  }
   return (
     <>
       <RolesBox>
+        <div className="addRole">
+          <Button
+            onClick={() => setIsAddRole(true)}
+            style={{
+              color: '#1677FF',
+              backgroundColor: 'rgba(22, 119, 255, 0.2)',
+            }}>
+            <PlusOutlined />
+            新增
+          </Button>
+          <div>
+            <Modal
+              title="添加角色"
+              open={isAddRole}
+              onOk={handleAddOk}
+              onCancel={handleAddCancel}
+              okText="添加"
+              cancelText="取消">
+              <div>
+                <Form
+                  ref={addformRef}
+                  name="addRole"
+                  wrapperCol={{
+                    span: 16,
+                  }}
+                  style={{
+                    maxWidth: 600,
+                    textAlign: 'center',
+                  }}
+                  initialValues={{
+                    remember: true,
+                    rolename: '',
+                    role_key: '',
+                    // menuList: checkedKeys,
+                  }}
+                  onFinish={onAddRoleFinish}
+                  onFinishFailed={onFinishFailed}>
+                  <Form.Item
+                    label="角色名称"
+                    name="rolename"
+                    rules={[
+                      {
+                        required: true,
+                        message: 'Please input your rolename!',
+                      },
+                    ]}>
+                    <Input />
+                  </Form.Item>
+                  <Form.Item
+                    label="权限字符"
+                    name="role_key"
+                    rules={[
+                      {
+                        required: true,
+                        message: 'Please input your role_key!',
+                      },
+                    ]}>
+                    <Input />
+                  </Form.Item>
+                  <Form.Item name="menuList">
+                    <Tree
+                      checkable
+                      checkedKeys={addRolecheckedKeys}
+                      // defaultCheckedKeys={
+                      //   currentMenuList && currentMenuList.length > 0
+                      //     ? currentMenuList.map((item) => item.id)
+                      //     : null
+                      // }
+                      // onSelect={onSelect}
+                      onCheck={(e) => onaddRoleCheck(e)}
+                      treeData={dataTree}
+                    />
+                  </Form.Item>
+                </Form>
+              </div>
+            </Modal>
+          </div>
+        </div>
         <div>
           {roleList && roleList.length > 0 ? (
             <Table
@@ -239,7 +351,9 @@ export default function RoleList() {
               title="修改角色"
               open={isModalOpen}
               onOk={handleOk}
-              onCancel={handleCancel}>
+              onCancel={handleCancel}
+              okText="修改"
+              cancelText="取消">
               <div>
                 <Form
                   ref={formRef}
@@ -306,4 +420,7 @@ export default function RoleList() {
 }
 const RolesBox = styled.div`
   font-size: 2em;
+  .addRole {
+    padding: 0 16px;
+  }
 `

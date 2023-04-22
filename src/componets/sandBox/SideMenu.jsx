@@ -1,5 +1,5 @@
 import React from 'react'
-import { Layout, Menu, theme } from 'antd'
+import { Layout, Menu, message } from 'antd'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -27,8 +27,13 @@ export default function SideMenu() {
   }
   useEffect(() => {
     async function menulist() {
-      const res = await http.get('/admin/getRouters')
-      setMenuList(res.data.data)
+      http.get('/admin/getRouters').then((res) => {
+        if (res.data.code != 200) {
+          message.error(res.data.msg)
+        } else {
+          setMenuList(res.data.data)
+        }
+      })
     }
     menulist()
     return () => {
@@ -71,13 +76,15 @@ export default function SideMenu() {
           博客管理
         </div>
         <div className="menu">
-          <Menu
-            theme="dark"
-            mode="inline"
-            selectedKeys={selectedKeys}
-            defaultOpenKeys={[]}
-            items={items}
-            style={{ textAlign: 'center', fontSize: '1.15em' }}></Menu>
+          {menuList && menuList.length > 0 ? (
+            <Menu
+              theme="dark"
+              mode="inline"
+              selectedKeys={selectedKeys}
+              defaultOpenKeys={[]}
+              items={items}
+              style={{ textAlign: 'center', fontSize: '1.15em' }}></Menu>
+          ) : null}
         </div>
       </SiderBox>
     </Sider>
