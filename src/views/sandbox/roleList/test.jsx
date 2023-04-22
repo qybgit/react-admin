@@ -67,28 +67,29 @@ export default function RoleList() {
     }
   }, [])
   //通过roleId获取角色所对应的信息包括所具有的权限
-  // useEffect(() => {
-  //   if (roleId) {
-  //     // http.post(`/system/role/${roleId}`).then((res) => {
-  //     //   setRoleMenuList(res.data.data)
-  //     //   // setCheckedKeys(res.data.data.menuList.map((item) => item.id))
-  //     // })
-  //     //白忙活一场
-  //     // const list = roleList.filter((item) => item.id == roleId)[0].menuList
-  //     // console.log(list.map((item) => item.id))
-  //     // list.filter((item) => item.grade == 2).map((item) => item.id)
-  //     //设置checked默认选中框
-  //   }
-  //   console.log('刷新')
-  //   return () => {
-  //     setRoleMenuList([])
-  //     setCheckedKeys([])
-  //   }
-  // }, [isModalOpen])
+  useEffect(() => {
+    if (roleId) {
+      http.post(`/system/role/${roleId}`).then((res) => {
+        setRoleMenuList(res.data.data)
+      })
+
+      //白忙活一场
+      // const list = roleList.filter((item) => item.id == roleId)[0].menuList
+      // console.log(list.map((item) => item.id))
+      // list.filter((item) => item.grade == 2).map((item) => item.id)
+
+      //设置checked默认选中框
+      setCheckedKeys(currentMenuList.map((item) => item.id))
+    }
+    return () => {
+      setRoleMenuList([])
+      setCheckedKeys([])
+    }
+  }, [roleId, currentMenuList])
   //修改角色信息
   useEffect(() => {
-    console.log('渲染')
     if (roleParam.id) {
+      console.log(roleParam)
       http.post(`/system/editRole`, roleParam).then((res) => {
         if (res.data.code == 200) {
           message.success(res.data.msg)
@@ -98,15 +99,6 @@ export default function RoleList() {
       })
     }
   }, [roleParam])
-  useEffect(() => {
-    function test(item) {
-      setRoleMenuList(item)
-    }
-    return () => {
-      setRoleMenuList([])
-    }
-  }, [roleId])
-
   //配置表格数据源
   const getChildren = (item) => {
     if (item && item.length > 0) {
@@ -198,11 +190,7 @@ export default function RoleList() {
   const onFindRoleList = (item) => {
     setIsModalOpen(true)
     setRoleId(item.key)
-    console.log(item)
-
-    test(item)
-    setCheckedKeys(item.menuList.map((item) => item.id))
-    // setCurrentMenuList(item.menuList)
+    setCurrentMenuList(item.menuList)
   }
   //角色列表数据源转换
   const datas = roleList.map((item) => {
@@ -240,7 +228,7 @@ export default function RoleList() {
     setCheckedKeys(e)
     formRef.current.setFieldsValue({
       menuList: e,
-      rolename: roleMenuList.name,
+      // rolename: roleMenuList.name,
     })
   }
   const onaddRoleCheck = (e) => {
@@ -268,7 +256,7 @@ export default function RoleList() {
   return (
     <>
       <RolesBox>
-        {/* <div className="addRole">
+        <div className="addRole">
           <Button
             onClick={() => setIsAddRole(true)}
             style={{
@@ -345,7 +333,7 @@ export default function RoleList() {
               </div>
             </Modal>
           </div>
-        </div> */}
+        </div>
         <div>
           {roleList && roleList.length > 0 ? (
             <Table

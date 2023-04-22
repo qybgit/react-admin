@@ -8,7 +8,7 @@ import SystemManage from './system-manage/SystemManage'
 import { Layout, Menu, theme } from 'antd'
 import styled from 'styled-components'
 import PermissionList from './permissionList/PermissionList'
-import RoleList from './roleList/RoleList'
+import RoleList from './roleList/test'
 const { Header, Sider, Content } = Layout
 
 export default function SandBox() {
