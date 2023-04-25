@@ -21,7 +21,7 @@ import {
   CloseOutlined,
 } from '@ant-design/icons'
 import styled from 'styled-components'
-const BigInt = require('big-integer')
+
 export default function UserList() {
   const [userList, setUserList] = useState([])
   const [userContent, setUserContent] = useState([])
@@ -51,14 +51,14 @@ export default function UserList() {
     },
   })
   useEffect(() => {
-    http.get('/admin/user/all', { responseType: 'json' }).then((res) => {
+    http.get('/admin/user/all').then((res) => {
       if (res.data.code !== 200) {
-        message.error(res.data.data.msg)
+        message.error(res.data.msg)
       } else {
         setUserList(res.data.data)
+        console.log(res.data.data)
       }
     })
-    console.log('shuaxing')
     http.get('/system/allRole').then((res) => {
       if (res.data.code !== 200) {
         message.error(res.data.data.msg)
@@ -78,6 +78,8 @@ export default function UserList() {
           message.error(res.data.msg)
         } else {
           message.success(res.data.msg)
+          setIsDel_flag(!isDel_flag)
+          setUserContent([])
         }
         setIsModalOpen(false)
       })
@@ -87,18 +89,22 @@ export default function UserList() {
   }, [userParam])
   useEffect(() => {
     if (newUserParam.nickName && newUserParam.email && newUserParam.password) {
-      http.post('/admin/user/addUser', newUserParam).then((res) => {
+      async function addUserFunction() {
+        const res = await http.post('/admin/user/addUser', newUserParam)
         if (res.data.code !== 200) {
           message.error(res.data.msg)
         } else {
           message.success(res.data.msg)
         }
-      })
-      setIsAddUser(false)
+        setIsAddUser(false)
+        setIsDel_flag(!isDel_flag)
+      }
+      addUserFunction()
+      //写在里面是因为添加数据耗费一些事件，需要异步执行，在执行后需重新加载UserList数据，所以 setIsDel_flag(!isDel_flag)需在必须在请求完成后执行
     }
 
     return () => {}
-  }, [isDel_flag])
+  }, [newUserParam])
   useEffect(() => {
     console.log(deletedParam)
     if (deletedParam.id) {
@@ -110,9 +116,9 @@ export default function UserList() {
         }
       })
       setIsDel_flag(!isDel_flag)
-      console.log('删除')
     }
   }, [deletedParam])
+  useEffect(() => {}, [isAddUser])
 
   const columns = [
     {
@@ -194,7 +200,6 @@ export default function UserList() {
     return roleItem
   })
   const onChangeSwitch = (item) => {
-    console.log(item.del_flag)
     item.del_flag = item.del_flag === 1 ? 0 : 1
     setDeletedParam({ del_flag: item.del_flag, id: item.key })
   }

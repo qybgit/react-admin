@@ -40,14 +40,16 @@ export default function SideMenu() {
       setMenuList([])
     }
   }, [])
-  // const handMenuChildren = (path) => {
-  //   navigate(`${path}`)
-  //}
+
   const handMenu = (path, children) => {
     if (children && children.length > 0) {
     } else {
       navigate(`${path}`)
     }
+  }
+  const handChildrenMenu = (path, children) => {
+    console.log(path)
+    navigate(`${path}`)
   }
   const items = menuList.map((item) => {
     const menuItem = {
@@ -62,7 +64,7 @@ export default function SideMenu() {
         key: child.path,
         label: child.menu_name,
         icon: iconList[child.path],
-        onClick: (e) => handMenu(child.path, child.children),
+        onClick: () => handChildrenMenu(child.path, child.children),
       }))
     }
 

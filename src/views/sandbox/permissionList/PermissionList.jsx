@@ -18,7 +18,6 @@ export default function PermissionList() {
     async function findMenuList() {
       const res = await http.get('/admin/getMenus')
       setMenuList(res.data.data)
-      console.log('shuax')
     }
     findMenuList()
     return () => {
@@ -72,53 +71,6 @@ export default function PermissionList() {
       ),
     },
   ]
-  // const columns = [
-  //   {
-  //     title: 'Name',
-  //     dataIndex: 'menu_name',
-  //     key: 'name',
-  //   },
-  //   {
-  //     title: '路径',
-  //     dataIndex: 'path',
-  //     key: 'Path',
-  //   },
-  //   {
-  //     title: '创造时间',
-  //     key: 'time',
-  //     dataIndex: 'create_time',
-  //   },
-  //   {
-  //     title: '权限',
-  //     dataIndex: 'permission',
-  //     key: 'permission',
-
-  //     render: (permission) => (
-  //       <>
-  //         <Tag color="orange">{permission}</Tag>
-  //       </>
-  //     ),
-  //   },
-  //   {
-  //     title: 'Action',
-  //     key: 'action',
-  //     render: (item) => (
-  //       <Space size="middle">
-  //         <Switch
-  //           checkedChildren={<CheckOutlined />}
-  //           unCheckedChildren={<CloseOutlined />}
-  //           checked={item.delFlag === 0 ? true : false}
-  //           onClick={() => onChangeSwitch(item)}
-  //         />
-  //         <Button
-  //           danger
-  //           shape="circle"
-  //           icon={<DeleteOutlined />}
-  //           onClick={() => showDeleteConfirm(item)}></Button>
-  //       </Space>
-  //     ),
-  //   },
-  // ]
   const getChildren = (item) => {
     if (item && item.length > 0) {
       const menuC = item.map((item) => {

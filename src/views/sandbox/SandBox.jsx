@@ -10,6 +10,8 @@ import styled from 'styled-components'
 import PermissionList from './permissionList/PermissionList'
 import RoleList from './roleList/RoleList'
 import UserList from './userList/UserList'
+import Category from './category/Category'
+import TagList from './tagList/TagList'
 const { Header, Sider, Content } = Layout
 
 export default function SandBox() {
@@ -34,6 +36,8 @@ export default function SandBox() {
                 <Route path="/admin/permission" element={<PermissionList />} />
                 <Route path="/admin/roles" element={<RoleList />} />
                 <Route path="/admin/userList" element={<UserList />} />
+                <Route path="/system/category" element={<Category />} />
+                <Route path="/system/tag" element={<TagList />} />
                 <Route path="/" element={<Home></Home>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

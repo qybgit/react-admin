@@ -15,7 +15,7 @@ http.interceptors.request.use(
     //   const { token } = JSON.parse(tokenE)
     //   config.headers.Authorization = `Bearer ${token}`
     // }
-    config.headers.Authorization = `Bearer eyJ0eXAiOiJqd3QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEwMDAwLCJleHAiOjE2ODIzMjA5MTB9.hGc8CxJyMODCVqtBbdLS5ovrWonYSopW_omQv_ppyWQ`
+    config.headers.Authorization = `Bearer eyJ0eXAiOiJqd3QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEwMDAwLCJleHAiOjE2ODI0MjQxOTB9.LhbOLUcXFas_IcTmfW9lLYIfGZMWa9VKEUNLQu_VWE0`
     return config
   }, (error) => {
     return Promise.reject(error)
