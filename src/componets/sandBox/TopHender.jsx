@@ -8,9 +8,26 @@ import {
 } from '@ant-design/icons'
 import { Layout, Menu, theme, Dropdown, Space, Avatar } from 'antd'
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 export default function TopHender() {
   const [collapsed, setSollapsed] = useState(false)
+
+  const navigate = useNavigate()
   const { Header, Sider, Content } = Layout
+  const tokenE = localStorage.getItem('blog-admin-key')
+  const useName = () => {
+    if (tokenE) {
+      let account = JSON.parse(tokenE)
+      return (
+        <div style={{ padding: '0 16px', float: 'left' }}>
+          欢迎{account.account}
+          <p>{account.account}</p>
+        </div>
+      )
+    } else {
+      return <span>未登录</span>
+    }
+  }
   const items = [
     {
       key: '1',
@@ -21,6 +38,9 @@ export default function TopHender() {
       key: '2',
       danger: true,
       label: '退出',
+      onClick: () => {
+        navigate('/login')
+      },
     },
   ]
   return (
@@ -37,7 +57,7 @@ export default function TopHender() {
         )}
         <div style={{ float: 'right' }}>
           {' '}
-          <span style={{ padding: '0 16px' }}>欢迎hhh</span>
+          {useName()}
           <Dropdown
             autoAdjustOverflow="true"
             menu={{

@@ -29,6 +29,7 @@ export default function SideMenu() {
     async function menulist() {
       http.get('/admin/getRouters').then((res) => {
         if (res.data.code != 200) {
+          localStorage.removeItem('blog-admin-key')
           message.error(res.data.msg)
         } else {
           setMenuList(res.data.data)
@@ -48,7 +49,6 @@ export default function SideMenu() {
     }
   }
   const handChildrenMenu = (path, children) => {
-    console.log(path)
     navigate(`${path}`)
   }
   const items = menuList.map((item) => {

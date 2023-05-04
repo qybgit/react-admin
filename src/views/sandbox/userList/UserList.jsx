@@ -32,6 +32,7 @@ export default function UserList() {
   const [roleList, setRoleList] = useState([])
   const [userId, setUserId] = useState(0)
   const [isDel_flag, setIsDel_flag] = useState(false)
+  const [sortedInfo, setSortedInfo] = useState({})
   const [deletedParam, setDeletedParam] = useState({
     id: null,
     del_flag: null,
@@ -50,6 +51,18 @@ export default function UserList() {
       id: null,
     },
   })
+  const handleChange = (pagination, filters, sorter) => {
+    console.log('Various parameters', pagination, filters, sorter)
+    setSortedInfo(sorter)
+    if (sorter.columnKey === 'time') {
+      const data = [...userList]
+      data.sort((a, b) => a.create_date - b.create_date)
+      if (sorter.order === 'descend') {
+        data.reverse()
+      }
+      setUserList(data)
+    }
+  }
   useEffect(() => {
     http.get('/admin/user/all').then((res) => {
       if (res.data.code !== 200) {
@@ -64,6 +77,7 @@ export default function UserList() {
         message.error(res.data.data.msg)
       } else {
         setRoleList(res.data.data)
+        console.log(res.data.data)
       }
     })
     return () => {
@@ -130,6 +144,15 @@ export default function UserList() {
       title: '角色名称',
       dataIndex: 'name',
       key: 'name',
+      filters: [
+        ...roleList.map((item) => {
+          return {
+            text: item.name,
+            value: item.id,
+          }
+        }),
+      ],
+      onFilter: (value, item) => value === item.roleVoId,
     },
     {
       title: '邮箱',
@@ -140,6 +163,8 @@ export default function UserList() {
       title: '创造时间',
       key: 'time',
       dataIndex: 'time',
+      sorter: (a, b) => a.create_date - b.create_date,
+      sortOrder: sortedInfo.columnKey === 'time' ? sortedInfo.order : null,
     },
     {
       title: '状态',
@@ -345,6 +370,7 @@ export default function UserList() {
             columns={columns}
             dataSource={datas}
             size="large"
+            onChange={handleChange}
           />
         ) : (
           <Spin size="large" />

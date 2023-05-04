@@ -10,12 +10,12 @@ const http = axios.create(
 //请求
 http.interceptors.request.use(
   (config) => {
-    // const tokenE = localStorage.getItem("blog-admin-key")
-    // if (tokenE) {
-    //   const { token } = JSON.parse(tokenE)
-    //   config.headers.Authorization = `Bearer ${token}`
-    // }
-    config.headers.Authorization = `Bearer eyJ0eXAiOiJqd3QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEwMDAwLCJleHAiOjE2ODI0MjQxOTB9.LhbOLUcXFas_IcTmfW9lLYIfGZMWa9VKEUNLQu_VWE0`
+    const tokenE = localStorage.getItem("blog-admin-key")
+    if (tokenE) {
+      const { token } = JSON.parse(tokenE)
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    // config.headers.Authorization = `Bearer eyJ0eXAiOiJqd3QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEwMDAwLCJleHAiOjE2ODI2NTQ5MjR9.8m7lbBw8Q6PecfmZG40xGJlxd41RxbITwPi2YOmjzcs`
     return config
   }, (error) => {
     return Promise.reject(error)

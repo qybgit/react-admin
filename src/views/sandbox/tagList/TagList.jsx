@@ -9,6 +9,7 @@ import {
   Form,
   Select,
   message,
+  Tag,
 } from 'antd'
 import React, { useState, useEffect, useRef } from 'react'
 import { http } from '../../../utils/request'
@@ -34,6 +35,9 @@ export default function TagList() {
   const addformRef = useRef(null)
   const [tagParam, setTagparam] = useState({
     id: null,
+    tag_Name: null,
+  })
+  const [newTag, setNewTag] = useState({
     tag_Name: null,
   })
 
@@ -62,11 +66,28 @@ export default function TagList() {
       setIsModalOpen(false)
     }
   }, [tagParam])
+  useEffect(() => {
+    if (newTag.tag_Name) {
+      http.post('/admin/tag/add', newTag).then((res) => {
+        if (res.data.code !== 200) {
+          message.error(res.data.msg)
+        } else {
+          message.success(res.data.msg)
+          setIsDel_flag(!isDel_flag)
+          addformRef.current.resetFeilds()
+        }
+      })
+      setIsAddTag(false)
+    }
+  }, [newTag])
   const columns = [
     {
       title: '标签名称',
-      dataIndex: 'tag_Name',
       key: 'tag_Name',
+      dataIndex: 'tag_Name',
+      render: (tag_Name) => {
+        return <Tag color="orange">{tag_Name}</Tag>
+      },
     },
     {
       title: '操作人员',
@@ -147,11 +168,20 @@ export default function TagList() {
       tag_Name: e.tag_Name,
     })
   }
-  const handleAddOk = () => {}
+  const handleAddOk = () => {
+    addformRef.current.submit()
+  }
   const handleAddCancel = () => {
     setIsAddTag(false)
+    setNewTag({
+      tag_Name: null,
+    })
   }
-  const onAddTagFinish = () => {}
+  const onAddTagFinish = (e) => {
+    setNewTag({
+      tag_Name: e.tag_Name,
+    })
+  }
   return (
     <div>
       <TagBox>
@@ -184,7 +214,6 @@ export default function TagList() {
                     maxWidth: 600,
                     textAlign: 'center',
                   }}
-                  initialValues={{}}
                   onFinish={onAddTagFinish}
                   onFinishFailed={onFinishFailed}>
                   <Form.Item
