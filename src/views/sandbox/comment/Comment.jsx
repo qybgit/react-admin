@@ -32,7 +32,6 @@ export default function CommentList() {
         setCommentList(res.data.data)
       }
     })
-    console.log('asdrf')
     return () => {
       setCommentList([])
     }
