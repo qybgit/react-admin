@@ -17,6 +17,7 @@ import 'nprogress/nprogress.css'
 import { useEffect } from 'react'
 import CommentList from './comment/Comment'
 import Article from './article/Article'
+import Error from './error/Error'
 
 export default function SandBox() {
   const { Header, Sider, Content } = Layout
@@ -46,6 +47,7 @@ export default function SandBox() {
                 <Route path="/system/category" element={<Category />} />
                 <Route path="/system/tag" element={<TagList />} />
                 <Route path="/system/comment" element={<CommentList />} />
+                <Route path="/error" element={<Error />} />
                 <Route path="/" element={<Home></Home>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
