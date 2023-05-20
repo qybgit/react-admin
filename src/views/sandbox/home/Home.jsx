@@ -7,16 +7,18 @@ import {
   Statistic,
   Avatar,
   Card,
-  Divider,
+  Upload,
   Drawer,
   Space,
   Tag,
   message,
+  Tooltip,
 } from 'antd'
 import {
   EditOutlined,
   EllipsisOutlined,
   SettingOutlined,
+  UploadOutlined,
 } from '@ant-design/icons'
 import styled from 'styled-components'
 import { useState } from 'react'
@@ -33,7 +35,6 @@ export default function Home() {
   const [tag, setTag] = useState([])
   const [categoty, setCategory] = useState([])
   const [myArticle, setMyArticle] = useState([])
-  const [tagCount, setTagCount] = useState([])
   const tokenE = localStorage.getItem('blog-admin-key')
   const [user, setUser] = useState({})
   const [open, setOpen] = useState(false)
@@ -41,24 +42,21 @@ export default function Home() {
   const [tagChart, setTagChart] = useState(null)
   const eRef = useRef(null)
   const hRef = useRef(null)
-  const s = 'sdrsertsssssssss'
-  console.log('1')
+  const tagChartRef = useRef(null)
+  let Token = null
+  if (tokenE) {
+    const { token } = JSON.parse(tokenE)
+    Token = token
+  }
   useEffect(() => {
-    console.log('ser')
-    if (tokenE) {
-      const token = JSON.parse(tokenE)
-      setUser(token)
-    }
     return () => {
       setUser({})
       setArticleCount(0)
       setCategory([])
       setTag([])
-      console.log('销毁')
     }
   }, [])
   useEffect(() => {
-    console.log('哈啊哈')
     http.get('/admin/article/count').then((res) => {
       if (res.data.code !== 200) {
         message.error(res.data.msg)
@@ -87,9 +85,7 @@ export default function Home() {
         setCategory(res.data.data.filter((item) => item.del_flag == 0))
       }
     })
-    return () => {
-      console.log('sd')
-    }
+    return () => {}
   }, [])
   //获取个人分类文章
   useEffect(() => {
@@ -98,19 +94,26 @@ export default function Home() {
         setMyArticle(res.data.data)
       }
     })
+
     http.get('/admin/tag/all').then((res) => {
       if (res.data.code == 200) {
-        setTagCount(res.data.data)
-        setTimeout(() => {
-          renderHomeEchar()
-        }, 5)
+        if (!tagChart) {
+          renderHomeEchar(res.data.data)
+        }
       }
     })
 
     return () => {
-      setTagChart(null)
       setPeiChart(null)
     }
+  }, [])
+  //用户信息
+  useEffect(() => {
+    http.get('/admin/user/content').then((res) => {
+      if (res.data.code == 200) {
+        setUser(res.data.data)
+      }
+    })
   }, [])
   const color = [
     'magenta',
@@ -221,43 +224,65 @@ export default function Home() {
       option && myChart.setOption(option)
     }
   }
-  //柱状图数据源
-  const getTagCount = tagCount.map((item) => {
-    return {
-      name: item.tag_Name,
-      value: item.count,
-    }
-  })
-  console.log(tagCount)
   //柱状图配置
-  const renderHomeEchar = () => {
-    if (tagCount && tagCount.length > 0) {
-      var myChart
-      if (tagChart) {
-        myChart = tagChart
-      } else {
-        myChart = Echarts.init(hRef.current)
-        setTagChart(myChart)
-      }
-      var option
-      option = {
-        xAxis: {
-          type: 'category',
-          data: tagCount.map((item) => item.tag_Name),
-        },
-        yAxis: {
-          type: 'value',
-        },
-        series: [
-          {
-            data: tagCount.map((item) => item.count),
-            type: 'bar',
-          },
-        ],
-      }
 
-      option && myChart.setOption(option)
+  const renderHomeEchar = (data) => {
+    if (!tagChartRef.current && hRef.current) {
+      tagChartRef.current = Echarts.init(hRef.current)
     }
+    const myChart = tagChartRef.current
+
+    //在此函数中第一次渲染时tagChart为空，初始化  myChart = Echarts.init(hRef.current)
+    // setTagChart(myChart)因为状态是异步更新的，第二次渲染时虽然setTagChart更新了状态，但此时tagChart还是为null,于是Echarts.init重复渲染
+    // var myChart
+    // if (tagChart) {
+    //   myChart = tagChart
+    // } else {
+    //   if (hRef.current) {
+    //     // 判断hRef.current是否存在
+    //     myChart = Echarts.init(hRef.current)
+    //     setTagChart(myChart)
+    //   }
+    // }
+    var option
+    option = {
+      xAxis: {
+        type: 'category',
+        data: data.map((item) => item.tag_Name),
+        axisLabel: {
+          interval: 0, // Display all categories
+        },
+      },
+      yAxis: {
+        type: 'value',
+      },
+      series: [
+        {
+          data: data.map((item) => item.count),
+          type: 'bar',
+        },
+      ],
+    }
+
+    option && myChart.setOption(option)
+  }
+  const props = {
+    name: 'image',
+    action: 'http://localhost:8082/admin/user/upload',
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${Token}`,
+    },
+    onChange(info) {
+      if (info.file.status !== 'uploading') {
+        console.log(info.file, info.fileList)
+      }
+      if (info.file.status === 'done') {
+        message.success(`${info.file.name} 更新成功`)
+      } else if (info.file.status === 'error') {
+        message.error(`${info.file.name} 更新失败`)
+      }
+    },
   }
   return (
     <>
@@ -326,25 +351,32 @@ export default function Home() {
               />
             }
             actions={[
-              <SettingOutlined
-                key="setting"
-                onClick={() => {
-                  setOpen(true)
-                  setTimeout(() => {
-                    renderEchar()
-                    getData()
-                  }, 5)
-                }}
-              />,
-              <EditOutlined key="edit" />,
+              <Tooltip title="查看分类">
+                <SettingOutlined
+                  key="setting"
+                  onClick={() => {
+                    setOpen(true)
+                    setTimeout(() => {
+                      renderEchar()
+                    }, 5)
+                  }}
+                />
+              </Tooltip>,
+              <Upload {...props}>
+                <Tooltip title="更改头像">
+                  <UploadOutlined key="edit"></UploadOutlined>
+                </Tooltip>
+              </Upload>,
               <EllipsisOutlined key="ellipsis" />,
             ]}>
             <Meta
               avatar={
-                <Avatar src="https://xsgames.co/randomusers/avatar.php?g=pixel" />
+                <a href={user ? `http://${user.avatar}` : null}>
+                  <Avatar src={user ? `http://${user.avatar}` : null} />
+                </a>
               }
-              title={user.account}
-              description={user.roleName}
+              title={user?.nickName}
+              description={user?.roleName}
             />
           </Card>
           <Drawer

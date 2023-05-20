@@ -193,12 +193,12 @@ export default function UserList() {
             onClick={() => onFindUser(item)}>
             修改
           </Button>
-          <Button
+          {/* <Button
             danger
             style={{ border: 'none' }}
             icon={<DeleteOutlined />}
             // onClick={() => showDeleteConfirm(item)}
-          ></Button>
+          ></Button> */}
         </Space>
       ),
     },
@@ -221,6 +221,7 @@ export default function UserList() {
     const roleItem = {
       label: item.name,
       value: item.id,
+      disabled: item.id === 1 ? true : false,
     }
     return roleItem
   })

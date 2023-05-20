@@ -3,10 +3,16 @@ import { IEditorConfig } from '@wangeditor/editor'
 import React, { useState, useEffect } from 'react'
 import { Editor, Toolbar } from '@wangeditor/editor-for-react'
 import { notification } from 'antd'
-export default function WangEditor({ getHtml }) {
+export default function WangEditor({ getHtml, content }) {
   const [editor, setEditor] = useState(null)
-  const [html, setHtml] = useState('<p>hello</p>')
+  const [html, setHtml] = useState(content)
   const tokenE = localStorage.getItem('blog-admin-key')
+  useEffect(() => {
+    setHtml(content)
+    return () => {
+      setHtml(null)
+    }
+  }, [content])
   let Token = null
   if (tokenE) {
     const { token } = JSON.parse(tokenE)
@@ -109,17 +115,15 @@ export default function WangEditor({ getHtml }) {
             getHtml(editor.getHtml())
           }}>
           <Editor
-            defaultConfig={editorConfig}
             value={html}
+            defaultConfig={editorConfig}
             onCreated={(editor) => {
               setEditor(editor)
             }}
             onChange={(editor) => setHtml(editor.getHtml())}
             mode="default"
             style={{ height: '500px', overflowY: 'hidden' }}
-            onBlur={() => {
-              console.log('jaja')
-            }}
+            onBlur={() => {}}
           />
         </div>
       </div>

@@ -12,12 +12,12 @@ import RoleList from './roleList/RoleList'
 import UserList from './userList/UserList'
 import Category from './category/Category'
 import TagList from './tagList/TagList'
-import Nprogress from 'nprogress'
 import 'nprogress/nprogress.css'
 import { useEffect } from 'react'
 import CommentList from './comment/Comment'
 import Article from './article/Article'
 import Error from './error/Error'
+import ArticleList from './articleList/ArticleList'
 
 export default function SandBox() {
   const { Header, Sider, Content } = Layout
@@ -47,6 +47,7 @@ export default function SandBox() {
                 <Route path="/system/category" element={<Category />} />
                 <Route path="/system/tag" element={<TagList />} />
                 <Route path="/system/comment" element={<CommentList />} />
+                <Route path="/system/article" element={<ArticleList />} />
                 <Route path="/error" element={<Error />} />
                 <Route path="/" element={<Home></Home>} />
                 <Route path="*" element={<NotFound />} />

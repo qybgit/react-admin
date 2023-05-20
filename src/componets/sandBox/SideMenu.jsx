@@ -7,13 +7,16 @@ import {
   EditOutlined,
   UserOutlined,
   VideoCameraOutlined,
+  ShopOutlined,
+  AppstoreOutlined,
 } from '@ant-design/icons'
 import { useState, useEffect } from 'react'
 import { http } from '../../utils/request'
 import { useNavigate, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
+import { connect } from 'react-redux'
 
-export default function SideMenu() {
+function SideMenu(props) {
   const { Header, Sider, Content } = Layout
   const [menuList, setMenuList] = useState([])
   const navigate = useNavigate()
@@ -21,9 +24,11 @@ export default function SideMenu() {
   const selectedKeys = [location.pathname]
   const openKeys = ['/' + location.pathname.split('/')[1]]
   const iconList = {
-    '/admin/userList': <UserOutlined />,
-    '/home': <VideoCameraOutlined />,
+    // '/admin/userList': <UserOutlined />,
+    '/home': <ShopOutlined />,
     '/admin/write': <EditOutlined />,
+    '/admin/system': <AppstoreOutlined />,
+    '/system/content': <AppstoreOutlined />,
   }
   useEffect(() => {
     async function menulist() {
@@ -72,9 +77,11 @@ export default function SideMenu() {
   })
 
   return (
-    <Sider trigger={null} collapsed={false} collapsible>
+    <Sider trigger={null} collapsed={props.isCollapsed} collapsible>
       <SiderBox>
-        <div className="logo" style={{ background: '#555' }}>
+        <div
+          className="logo"
+          style={{ textDecoration: 'center', color: '#1677ff' }}>
           博客管理
         </div>
         <div className="menu">
@@ -85,24 +92,35 @@ export default function SideMenu() {
               selectedKeys={selectedKeys}
               defaultOpenKeys={[]}
               items={items}
-              style={{ textAlign: 'center', fontSize: '1.15em' }}></Menu>
+              style={{
+                padding: '0 ',
+                textAlign: 'left',
+                fontSize: '1.15em',
+              }}></Menu>
           ) : null}
         </div>
       </SiderBox>
     </Sider>
   )
 }
+
 const SiderBox = styled.div`
-  display: flex;
-  flex-direction: column;
+  /* display: flex;
+  flex-direction: column; */
   height: 100%;
   width: 100%;
   .menu {
-    flex: 1;
+    /* flex: 1; */
     overflow: auto;
   }
   .logo {
     font-size: 1.3em;
-    text-align: left;
+    text-align: center;
   }
 `
+const mapSideMenu = ({ CollApsedReducers: { isCollapsed } }) => {
+  return {
+    isCollapsed,
+  }
+}
+export default connect(mapSideMenu)(SideMenu)

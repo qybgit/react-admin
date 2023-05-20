@@ -1,10 +1,14 @@
 import IndexRouter from "./router/IndexRouter"
 import './App.css'
-import { useEffect } from "react"
+import { Provider } from 'react-redux'
+import store from "./redux/store"
 function App () {
   return (
     <div className="App">
-      <IndexRouter></IndexRouter>
+      <Provider store={store}>
+        <IndexRouter></IndexRouter>
+
+      </Provider>
     </div>
   )
 }

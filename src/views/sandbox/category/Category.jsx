@@ -7,7 +7,7 @@ import {
   Spin,
   Input,
   Form,
-  Select,
+  Typography,
   message,
 } from 'antd'
 import React, { useState, useEffect, useRef } from 'react'
@@ -40,6 +40,8 @@ export default function Category() {
   })
   const formRef = useRef(null)
   const addformRef = useRef(null)
+  const { confirm } = Modal
+  const { Text } = Typography
 
   useEffect(() => {
     http.get('/admin/category/all').then((res) => {
@@ -85,8 +87,20 @@ export default function Category() {
   const columns = [
     {
       title: '分类名称',
-      dataIndex: 'category_name',
       key: 'category_name',
+      render: (item) => {
+        return (
+          <>
+            {item.del_flag === 0 ? (
+              item.category_name
+            ) : (
+              <Text style={{ color: 'red' }} delete>
+                {item.category_name}
+              </Text>
+            )}
+          </>
+        )
+      },
     },
     {
       title: '操作人员',
@@ -119,22 +133,60 @@ export default function Category() {
       key: 'action',
       render: (item) => (
         <Space size="middle">
-          <Button
-            style={{ border: 'none', color: '#1677FF' }}
-            icon={<EditOutlined />}
-            onClick={() => onFindCategory(item)}>
-            修改
-          </Button>
-          <Button
-            danger
-            style={{ border: 'none' }}
-            icon={<DeleteOutlined />}
-            // onClick={() => showDeleteConfirm(item)}
-          ></Button>
+          {item.del_flag === 0 ? (
+            <>
+              {' '}
+              <Button
+                style={{ border: 'none', color: '#1677FF' }}
+                icon={<EditOutlined />}
+                onClick={() => onFindCategory(item)}>
+                修改
+              </Button>
+              <Button
+                danger
+                style={{ border: 'none' }}
+                icon={<DeleteOutlined />}
+                onClick={() => showDeleteConfirm(item)}></Button>
+            </>
+          ) : (
+            <Button
+              style={{ border: 'none', color: 'red' }}
+              icon={<DeleteOutlined />}>
+              从记录中删除
+            </Button>
+          )}
         </Space>
       ),
     },
   ]
+  const showDeleteConfirm = (item) => {
+    confirm({
+      title: '确认删除吗',
+      icon: <ExclamationCircleFilled />,
+      content: '',
+      okText: 'Yes',
+      okType: 'danger',
+      cancelText: 'No',
+      onOk() {
+        deleteMetod(item)
+      },
+      onCancel() {
+        // setMenuList(menuList.filter((data) => data.id !== item.id))
+      },
+    })
+  }
+  const deleteMetod = (item) => {
+    http.delete(`/admin/category/delete/${item.key}`).then((res) => {
+      if (res.data.code == 200) {
+        message.success('删除成功')
+        const list = categoryList.filter((data) => data.id == item.key)
+        list[0].del_flag = 1
+        setCategoryList([...categoryList])
+      } else {
+        message.error(res.data.msg)
+      }
+    })
+  }
   //Table表数据源配置
   const datas = categoryList.map((item) => {
     const menuItem = {

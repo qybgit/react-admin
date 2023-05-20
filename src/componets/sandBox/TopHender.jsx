@@ -7,31 +7,41 @@ import {
   VideoCameraOutlined,
 } from '@ant-design/icons'
 import { Layout, Menu, theme, Dropdown, Space, Avatar } from 'antd'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-export default function TopHender() {
-  const [collapsed, setSollapsed] = useState(false)
-
+import { connect } from 'react-redux'
+import { http } from '../../utils/request'
+function TopHender(props) {
   const navigate = useNavigate()
+  const [user, setUser] = useState({})
   const { Header, Sider, Content } = Layout
   const tokenE = localStorage.getItem('blog-admin-key')
   const useName = () => {
     if (tokenE) {
       let account = JSON.parse(tokenE)
       return (
-        <div style={{ padding: '0 16px', float: 'left' }}>
-          欢迎{account.account}
-          <p>{account.account}</p>
+        <div style={{ padding: '0 10px', float: 'left' }}>
+          欢迎<span style={{ color: '#1677FF' }}>{account.account}</span>
         </div>
       )
     } else {
       return <span>未登录</span>
     }
   }
+  useEffect(() => {
+    http.get('/admin/user/content').then((res) => {
+      if (res.data.code == 200) {
+        setUser(res.data.data)
+      }
+    })
+    return () => {
+      setUser({})
+    }
+  }, [])
   const items = [
     {
       key: '1',
-      label: <a target="_blank">超级管理员</a>,
+      label: <a target="_blank">设置项</a>,
     },
 
     {
@@ -39,10 +49,19 @@ export default function TopHender() {
       danger: true,
       label: '退出',
       onClick: () => {
-        navigate('/login')
+        http.get('/admin/logout').then((res) => {
+          localStorage.removeItem('blog-admin-key')
+          if (res.data.code == 200) {
+            console.log('tu')
+            navigate('/admin/login')
+          }
+        })
       },
     },
   ]
+  const onClick = () => {
+    props.changeCollapsed()
+  }
   return (
     <>
       <Header
@@ -50,10 +69,10 @@ export default function TopHender() {
           padding: '0 30px',
           background: '#FFF',
         }}>
-        {!collapsed ? (
-          <MenuFoldOutlined onClick={() => setSollapsed(!collapsed)} />
+        {props.isCollapsed ? (
+          <MenuFoldOutlined onClick={onClick} />
         ) : (
-          <MenuUnfoldOutlined onClick={() => setSollapsed(!collapsed)} />
+          <MenuUnfoldOutlined onClick={onClick} />
         )}
         <div style={{ float: 'right' }}>
           {' '}
@@ -64,7 +83,12 @@ export default function TopHender() {
               items,
             }}>
             <a onClick={(e) => e.preventDefault()}>
-              <Avatar shape="square" size="large" icon={<UserOutlined />} />
+              <Avatar
+                src={user ? `http://${user.avatar}` : null}
+                shape="square"
+                size="large"
+                icon={<UserOutlined />}
+              />
             </a>
           </Dropdown>
         </div>
@@ -72,3 +96,17 @@ export default function TopHender() {
     </>
   )
 }
+const mapStateTopProps = ({ CollApsedReducers: { isCollapsed } }) => {
+  return {
+    isCollapsed,
+  }
+}
+const mapDispathTopprops = {
+  changeCollapsed() {
+    return {
+      type: 'change_collapsed',
+    }
+  },
+}
+
+export default connect(mapStateTopProps, mapDispathTopprops)(TopHender)

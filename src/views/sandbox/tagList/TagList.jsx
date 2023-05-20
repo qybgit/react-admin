@@ -8,6 +8,7 @@ import {
   Input,
   Form,
   Select,
+  Typography,
   message,
   Tag,
 } from 'antd'
@@ -33,6 +34,9 @@ export default function TagList() {
 
   const formRef = useRef(null)
   const addformRef = useRef(null)
+  const { confirm } = Modal
+  const { Text } = Typography
+
   const [tagParam, setTagparam] = useState({
     id: null,
     tag_Name: null,
@@ -84,9 +88,18 @@ export default function TagList() {
     {
       title: '标签名称',
       key: 'tag_Name',
-      dataIndex: 'tag_Name',
-      render: (tag_Name) => {
-        return <Tag color="orange">{tag_Name}</Tag>
+      render: (item) => {
+        return (
+          <>
+            {item.del_flag === 0 ? (
+              <Tag color="orange">{item.tag_Name}</Tag>
+            ) : (
+              <Text style={{ color: 'red' }} delete>
+                {item.tag_Name}
+              </Text>
+            )}
+          </>
+        )
       },
     },
     {
@@ -120,22 +133,59 @@ export default function TagList() {
       key: 'action',
       render: (item) => (
         <Space size="middle">
-          <Button
-            style={{ border: 'none', color: '#1677FF' }}
-            icon={<EditOutlined />}
-            onClick={() => onFindTag(item)}>
-            修改
-          </Button>
-          <Button
-            danger
-            style={{ border: 'none' }}
-            icon={<DeleteOutlined />}
-            // onClick={() => showDeleteConfirm(item)}
-          ></Button>
+          {item.del_flag === 0 ? (
+            <>
+              <Button
+                style={{ border: 'none', color: '#1677FF' }}
+                icon={<EditOutlined />}
+                onClick={() => onFindTag(item)}>
+                修改
+              </Button>
+              <Button
+                danger
+                style={{ border: 'none' }}
+                icon={<DeleteOutlined />}
+                onClick={() => showDeleteConfirm(item)}></Button>
+            </>
+          ) : (
+            <Button
+              style={{ border: 'none', color: 'red' }}
+              icon={<DeleteOutlined />}>
+              从记录中删除
+            </Button>
+          )}
         </Space>
       ),
     },
   ]
+  const showDeleteConfirm = (item) => {
+    confirm({
+      title: '确认删除吗',
+      icon: <ExclamationCircleFilled />,
+      content: '',
+      okText: 'Yes',
+      okType: 'danger',
+      cancelText: 'No',
+      onOk() {
+        deleteMetod(item)
+      },
+      onCancel() {
+        // setMenuList(menuList.filter((data) => data.id !== item.id))
+      },
+    })
+  }
+  const deleteMetod = (item) => {
+    http.delete(`/admin/tag/delete/${item.key}`).then((res) => {
+      if (res.data.code == 200) {
+        message.success('删除成功')
+        const list = tagList.filter((data) => data.id == item.key)
+        list[0].del_flag = 1
+        setTagList([...tagList])
+      } else {
+        message.error(res.data.msg)
+      }
+    })
+  }
   //Table表数据源配置
   const datas = tagList.map((item) => {
     const menuItem = {

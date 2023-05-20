@@ -16,25 +16,28 @@ import { http } from '../../../utils/request'
 import styled from 'styled-components'
 import WangEditor from './WangEditor'
 import { notification } from 'antd'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 
 export default function Article() {
-  const [detail, setDetail] = useState('')
+  const location = useLocation()
+  const searchParams = new URLSearchParams(location.search)
+  const id = searchParams.get('id')
   const [html, setHtml] = useState('')
   const [categoryList, setCateGoryList] = useState([])
   const [tagList, setTagList] = useState([])
+  const [myArticle, setMyArticle] = useState({})
   const [isSuccess, setIsSuccess] = useState(true)
   const formRef = useRef(null)
   const navigate = useNavigate()
   useEffect(() => {
-    http.get('admin/category/all').then((res) => {
+    http.get('admin/category/alls').then((res) => {
       if (res.data.code !== 200) {
         message.error(res.data.msg)
       } else {
         setCateGoryList(res.data.data)
       }
     })
-    http.get('admin/tag/all').then((res) => {
+    http.get('admin/tag/alls').then((res) => {
       if (res.data.code !== 200) {
         message.error(res.data.msg)
       } else {
@@ -47,6 +50,33 @@ export default function Article() {
       setHtml('')
     }
   }, [])
+  useEffect(() => {
+    if (id) {
+      http.get(`/admin/article/${id}`).then((res) => {
+        if (res.data.code !== 200) {
+          navigate('error')
+        } else {
+          setMyArticle(res.data.data)
+          formRef.current.setFieldsValue({
+            title: res.data.data.title,
+            introduction: res.data.data.summary,
+            categoryName: res.data.data.category.id,
+            tagName: res.data.data.tags?.map((item) => item.id),
+          })
+        }
+      })
+    } else {
+      setMyArticle({})
+      if (formRef.current) {
+        formRef.current.resetFields()
+      }
+    }
+    return () => {
+      if (formRef.current) {
+        formRef.current.resetFields()
+      }
+    }
+  }, [id])
   const optionsCategory = categoryList.map((item) => {
     const categoryItem = {
       label: item.category_name,
@@ -88,15 +118,42 @@ export default function Article() {
         }
       }),
     }
-    console.log(articleParam)
-    http.post('/admin/article/add', articleParam).then((res) => {
-      if (res.data.code !== 200) {
-        notification.error({ message: res.data.msg })
-      } else {
-        notification.success({ message: '上传成功' })
-        setIsSuccess(false)
+    if (id) {
+      console.log('修改')
+      const updateParam = {
+        id: id,
+        articleBodyVo: {
+          content: values.content,
+        },
+        title: values.title,
+        summary: values.introduction,
+        category: {
+          id: values.categoryName,
+        },
+        tags: values.tagName?.map((item) => {
+          return {
+            id: item,
+          }
+        }),
       }
-    })
+
+      http.post('/admin/article/updateArticle', updateParam).then((res) => {
+        if (res.data.code == 200) {
+          notification.success({ message: '修改成功' })
+          setIsSuccess(false)
+        }
+      })
+    } else {
+      console.log('发布')
+      http.post('/admin/article/add', articleParam).then((res) => {
+        if (res.data.code !== 200) {
+          notification.error({ message: res.data.msg })
+        } else {
+          notification.success({ message: '发布成功' })
+          setIsSuccess(false)
+        }
+      })
+    }
   }
   const handleCategoryChange = (e) => {
     console.log(e)
@@ -113,6 +170,7 @@ export default function Article() {
       event.preventDefault()
       event.stopPropagation()
     }
+
     return (
       <Tag
         color="orange"
@@ -159,6 +217,11 @@ export default function Article() {
               maxWidth: 10000,
               padding: '25px 25px',
             }}
+            // initialValues={{
+            //   title: myArticle.title,
+            //   introduction: myArticle.summary,
+
+            // }}
             validateMessages={validateMessages}>
             <Form.Item
               style={{ padding: '20px 0' }}
@@ -233,6 +296,11 @@ export default function Article() {
               }}></EditorCompent> */}
                 {/* <QuillEditor></QuillEditor> */}
                 <WangEditor
+                  content={
+                    Object.keys(myArticle).length === 0
+                      ? '<p>请输入内容</p>'
+                      : myArticle.articleBodyVo.content
+                  }
                   getHtml={(value) => {
                     formRef.current.setFieldsValue({
                       content: value,

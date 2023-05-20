@@ -125,7 +125,6 @@ export default function CommentList() {
         message.success(res.data.msg)
         const list = commentList.filter((data) => data.id == item.key)
         list[0].del_flag = 1
-        console.log(list)
         setCommentList([...commentList])
       }
     })

@@ -105,6 +105,7 @@ export default function RoleList() {
           message.error(res.data.msg)
         } else {
           message.success(res.data.data)
+          addformRef.current.resetFields()
         }
       })
     }
@@ -264,6 +265,7 @@ export default function RoleList() {
   //新增角色model确认按钮提交表单
   const handleAddOk = () => {
     addformRef.current.submit()
+    setIsAddRole(false)
   }
   //关闭modle
   const handleAddCancel = () => {

@@ -23,13 +23,17 @@ data.forEach((item) => {
 console.log(hashTable)
 console.log("ef")
 console.log(Object.entries(hashTable))
-{
-  a: 2
-  b: 1
-  c: 2
+m = {}
+console.log(Object.keys(m).length)
+if (m) {
+
+  console.log("sd")
+} else {
+  console.log("sdr")
 }
-[
-  { a: 2 },
-  { b: 1 },
-  { c: 2 }
-]
+const t = {
+  a: 1,
+  test () { }
+  , b: 3
+}
+console.log(t)
